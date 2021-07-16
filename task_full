@@ -1,11 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Wed Jul  7 18:05:08 2021
-
-@author: titan
-"""
-
 
 from dlclive.processor import Processor
 from psychopy import core, visual
@@ -83,9 +75,30 @@ class Task(Processor):
         # PAINFUL calibration by ha
         snout = ((pose[0,:2] - [45, 15]) / 380) * .93 + .035
         snout[1] = 1-snout[1]
+        snout = (snout-0.5)*2
 
-        array = np.array([[3,1,0.025,-10],[128,0.25,0.01,0],[3,0.5,0.01,-10],[128,0.5,0.025,-10],[4,0.25,0.05,0],[3,0.5,0.05,0],[4,0.25,0.05,0],
-        [3,0.5,0.025,-10],[128,0.5,0.01,-10],[128,1,0.05,0]])
+        leftear = ((pose[1,:2] - [45, 15]) / 380) * .93 + .035
+        leftear[1] = 1-leftear[1]
+        leftear = (leftear-0.5)*2
+
+        rightear = ((pose[2,:2] - [45, 15]) / 380) * .93 + .035
+        rightear[1] = 1-rightear[1]
+        rightear = (rightear-0.5)*2
+
+        [x1,y1] = [snout[0],snout[1]]
+        [x2,y2] = [leftear[0],leftear[1]]
+        [x3,y3] = [rightear[0],rightear[1]]
+        [x4,y4] = [(x3+x2)/2,(y3+y2)/2] # mid-point between the ears
+
+        m = (y1 - y4) /(x1 - x4)
+        b = y1 - m * x1
+
+        y = m*(x1) + b
+
+        headangle = np.arctan(m)
+
+        array = np.array([[3,0,0.025,-10],[128,0,0.01,0],[3,0,0.01,-10],[128,0,0.025,-10],[4,0,0.05,0],[3,0,0.05,0],[4,0,0.05,0],
+        [3,0,0.025,-10],[128,0,0.01,-10],[128,0,0.05,0]])
 
         r = array[np.random.choice(len(array))] 
         r1 = array[np.random.choice(len(array))]
@@ -129,16 +142,13 @@ class Task(Processor):
             self.datagathering = self.datagathering+1
 
 
-        if (snout[1] > .5) & (self.state == True): #ALPHA
+        if (snout[1] > 0) & (self.state == True): #ALPHA
             """
                 This is basically the last state that happens.
             """
             if (self.passedline == 1):
                 
-                position = np.array([[0.22216303370895052, 0.031733589373748546], [0.40144834711725796,0.47724850141668856],
-                [0.30788024959264343,2.6598171683630523],[0.7240064106497601,2.0806739729857675],[0.45870175805113417,2.447895768943644],
-                [0.423251456246643,0.30445696854693516],[0.4341329637923252,0.22063935211653524],[0.3067776429736755,2.411795947136634],
-                [0.4060495897963093,0.17490150256153883],[0.5177563202274313,0.014031409476287941]])
+                position = np.array([[0, 0], [0,0]])
             
                 position = position[np.random.choice(len(position))]
                 print(position)
@@ -148,6 +158,7 @@ class Task(Processor):
                 angle = position[1]
 
                 (self.x_position,self.y_position) = (snout[0] + distance * math.cos(angle), 0 + distance * math.sin(angle))
+
 
                 print('snout[0] = %f'%(snout[0]))
                 print('snout[1] = %f'%(snout[1]))
@@ -168,6 +179,8 @@ class Task(Processor):
                 self.circle.draw()
                 self.circle1.draw()
                 self.win.flip()
+                print(headangle)
+                
 
             ## GATHER DATA
             if self.wewantfirstdata == 1: #We save data WHEN the mouse pass 0.5 and state == True, just that 1 time
