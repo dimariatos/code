@@ -42,6 +42,7 @@ class Task(Processor):
         self.y_position = 0
         self.x_position1 = 0 
         self.y_position1 = 0
+
         self.stim_on_time = []
         self.stim_off_time = []
 
@@ -97,6 +98,7 @@ class Task(Processor):
         y = m*(x1) + b
 
         headangle = np.arctan(m)
+        
 
         array = np.array([[3,1,0.025,-10],[128,1,0.01,0],[3,1,0.01,-10],[128,1,0.025,-10],[4,1,0.05,0],[3,1,0.05,0],[4,1,0.05,0],
         [3,1,0.025,-10],[128,1,0.01,-10],[128,1,0.05,0]])
@@ -152,37 +154,37 @@ class Task(Processor):
                 position = np.array([[0.24367, 0.2345], [0.345786,0.467]])
             
                 position = position[np.random.choice(len(position))]
-               
+                print(position)
+                
                 distance = position[0]
                 
                 angle = position[1]
 
-                (self.x_position,self.y_position) = (snout[0] + distance * math.cos(angle), 0 + distance * math.sin(angle))
-
+                (self.x_position,self.y_position) = (snout[0] + distance * math.sin(angle), 0 + distance * math.cos(angle))
                 (self.x_position,self.y_position)=(self.x_position*math.cos(headangle)-self.y_position*math.sin(headangle),self.x_position*math.sin(headangle)+self.y_position* math.cos(headangle))
-           
 
-                position1 = np.array([[0.24367, 0.2345], [0.345786,0.467]])
+                 
+                position1 = np.array([[0.24367, 0.1345], [0.345786,0.567]])
             
                 position1 = position1[np.random.choice(len(position1))]
+                
                 
                 distance1 = position1[0]
                 
                 angle1 = position1[1]
 
-                (self.x_position1,self.y_position1) = (snout[0] + distance1 * math.cos(angle1), 0 + distance1 * math.sin(angle1))
-
+                (self.x_position1,self.y_position1) = (snout[0] + distance1 * math.sin(angle1), 0 + distance1 * math.cos(angle1))
                 (self.x_position1,self.y_position1)=(self.x_position1*math.cos(headangle)-self.y_position1*math.sin(headangle),self.x_position1*math.sin(headangle)+self.y_position1* math.cos(headangle))
-
-
-            print('snout[0] = %f'%(snout[0]))
-            print('snout[1] = %f'%(snout[1]))
-            #print('distance = %f'%(distance))
-            print('self.x_position = %f, self.y_position = %f'%(self.x_position,self.y_position))
-            self.passedline = 0
+                
+                print('snout[0] = %f'%(snout[0]))
+                print('snout[0] = %f'%(snout[0]))
+                print('snout[1] = %f'%(snout[1]))
+                print('distance = %f'%(distance))
+                print('self.x_position = %f, self.y_position = %f'%(self.x_position,self.y_position))
+                self.passedline = 0
 
             ## SHOULD ONLY SHOW THE CIRCLE EVERY 1/4th TIME
-            if (self.datagathering%2) == 0: #Datagathering is a counting value that increase everytime the mouse re-initialize the stimulus why turning the state from TRUE --> FALSE
+            if (self.datagathering%3) == 0: #Datagathering is a counting value that increase everytime the mouse re-initialize the stimulus why turning the state from TRUE --> FALSE
                 self.circle.opacity = self.the_Op   #This is what makes the opacity of the circle
                 self.circle.ori -= self.if_we_spin #This is what spinns the cspahe
                 self.circle1.opacity = self.the_Op1
@@ -190,12 +192,11 @@ class Task(Processor):
                 self.circle.pos = (self.x_position,self.y_position)
                 self.circle1.pos = (self.x_position1,self.y_position1)
                 ## MAKE LASER READ
+                self.laserPin.write(1)
                 self.circle.draw()
                 self.circle1.draw()
                 self.win.flip()
-
-            if(self.the_Op%2) > 0:
-               self.laserPin.write(1) 
+                print(headangle)
                 
 
             ## GATHER DATA
