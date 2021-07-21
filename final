@@ -74,7 +74,7 @@ class Task(Processor):
         #self.circle.opacity = 0
         #print(self.circle.opacity)
        
-        # PAINFUL calibration by ha
+        # PAINFUL calibration by hand
         snout = ((pose[0,:2] - [45, 15]) / 380) * .93 + .035
         snout[1] = 1-snout[1]
         snout = (snout-0.5)*2
@@ -102,8 +102,10 @@ class Task(Processor):
         headangle = headangle + 1.5708
 
 
-        array = array = np.array([[3,1,0.025,-10],[128,1,0.01,0],[3,1,0.01,-10],[128,1,0.025,-10],[4,1,0.05,0],[3,1,0.05,0],[4,1,0.05,0],
-        [3,1,0.025,-10],[128,1,0.01,-10],[128,1,0.05,0]])
+        array = np.array([[3,1,0.01,10],[128,1,0.025,0],[128,1,0.025,-10],[128,1,0.025,-10],
+        [3,1,0.01,-10],[128,1,0.05,0],[128,1,0.05,-10],[4,1,0.025,-10],[128,1,0.05,-10],
+        [4,1,0.025,-10],[4,1,0.025,0],[3,1,0.01,-10], [3,1,0.01,0],[128,1,0.01,0],[3,1,0.025,-10],
+        [128,1,0.05,-10],[4,1,0.025,0],[128,1,0.05,0],[128,1,0.025,0],[4,1,0.025,-10]])
 
         r = array[np.random.choice(len(array))] 
         r1 = array[np.random.choice(len(array))]
@@ -147,35 +149,38 @@ class Task(Processor):
             self.datagathering = self.datagathering+1
             self.laser = self.laser + 1
 
-        if (snout[1] > 0) & (self.state == True): #ALPHA
+        if (snout[1] > -0.1) & (self.state == True): #ALPHA
             """
                 This is basically the last state that happens.
             """
             if (self.passedline == 1):
                 
-                position = np.array([[0.2341329637923252,0.22063935211653524],[0.3067776429736755,0.7298],[0.3060495897963093,0.17490150256153883],[0.2177563202274313,0.014031409476287941]])
+                position = np.array([[0.345124048611534,0.31092,0.2986379991671331,0.0923123307118616],
+                [0.3264870654094638,0.3164061037921699,0.3916007249175778,0.2214495887677442], 
+                [0.3184087513325254,0.1337,0.3539590839116937,0.87925],
+                [0.3389969634209976,0.3487747011160018,0.2445337644944189,0.5099765907582785],
+                [0.367863189193704,0.6459206009855982,0.2835000107104188,0.5944752850701914],
+                [0.3490377382810209,0.5234212920927465,0.3158038041104287,0.3288673286884608],
+                [0.204640958925259,0.7375779833786207,0.2696941576821826,0.540962695199933],
+                [0.3653431457256266,0.0269425707604928,0.2006729040804592,0.5654396950901495],
+                [0.2299346725539502,0.0540982194547274,0.2497587457440584,0.4762],
+                [0.2878285469075038,0.64172,0.3446388947783994,0.167342554078676]])
             
                 position = position[np.random.choice(len(position))]
-                print(position)
+               
                 
                 distance = position[0]
                 
                 angle = position[1]
 
-                (self.x_position,self.y_position) = (snout[0] + distance * math.sin(angle), 0 + distance * math.cos(angle))
+                (self.x_position,self.y_position) = (snout[0] + distance * math.sin(angle), -0.1 + distance * math.cos(angle))
                 (self.x_position,self.y_position)=(self.x_position*math.cos(headangle)-self.y_position*math.sin(headangle),self.x_position*math.sin(headangle)+self.y_position* math.cos(headangle))
+                
+                distance1 = position[2]
+                
+                angle1 = position[3]
 
-                 
-                position1 = np.array([[0.22216303370895052,0.031733589373748546],[0.20144834711725796,0.47724850141668856],[0.223251456246643,0.30445696854693516]])
-            
-                position1 = position1[np.random.choice(len(position1))]
-                
-                
-                distance1 = position1[0]
-                
-                angle1 = position1[1]
-
-                (self.x_position1,self.y_position1) = (snout[0] + distance1 * math.sin(angle1), 0 + distance1 * math.cos(angle1))
+                (self.x_position1,self.y_position1) = (snout[0] + distance1 * math.sin(angle1), -0.1 + distance1 * math.cos(angle1))
                 (self.x_position1,self.y_position1)=(self.x_position1*math.cos(headangle)-self.y_position1*math.sin(headangle),self.x_position1*math.sin(headangle)+self.y_position1* math.cos(headangle))
                 
                 if self.y_position < 0:
@@ -185,6 +190,8 @@ class Task(Processor):
                     self.y_position1 = self.y_position1*-1
                 
                 print('distance = %f'%(distance))
+                print(snout[0])
+                print(snout[1])
                 print('self.x_position = %f, self.y_position = %f'%(self.x_position,self.y_position))
                 print('self.x_position1 = %f, self.y_position1 = %f'%(self.x_position1,self.y_position1))
 
@@ -202,6 +209,7 @@ class Task(Processor):
                 self.circle.draw()
                 self.circle1.draw()
                 self.win.flip()
+                print('stimuli now')
                 
 
 
@@ -219,6 +227,7 @@ class Task(Processor):
             """
             if (self.laser%2) == 0:
                     self.laserPin.write(1)
+                    print(self.laser)
             """
                 Now from GAMMA we set the startingFlag to be equal 1. Meaning that this below will happend. However, the last line in BETA makes startingFlag go to 0.
                 There fore we only change the pos, opacity, circle edgem and so on 1 time per round.
@@ -264,7 +273,7 @@ class Task(Processor):
             """
                 This basically the first thing that ever happen for every round.
             """
-
+          
             ## GATHER DATA AND SAVE DATA TO FILE
             if self.save_Data_when_mouse_turn_it_off == 1: # This saves the data when the mouse has put its snout in the 2nd port
                 self.thedata = np.vstack((self.thedata,[self.circle.pos[0],self.circle.pos[1],self.circle.edges,self.circle.opacity*2, self.circle.radius,self.if_we_spin,self.circle1.pos[0]
