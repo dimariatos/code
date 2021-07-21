@@ -102,10 +102,10 @@ class Task(Processor):
         headangle = headangle + 1.5708
 
 
-        array = np.array([[3,1,0.01,10],[128,1,0.025,0],[128,1,0.025,-10],[128,1,0.025,-10],
+        array = np.array([[3,1,0.01,-10],[128,1,0.025,-10],[128,1,0.025,-10],[128,1,0.025,-10],
         [3,1,0.01,-10],[128,1,0.05,0],[128,1,0.05,-10],[4,1,0.025,-10],[128,1,0.05,-10],
-        [4,1,0.025,-10],[4,1,0.025,0],[3,1,0.01,-10], [3,1,0.01,0],[128,1,0.01,0],[3,1,0.025,-10],
-        [128,1,0.05,-10],[4,1,0.025,0],[128,1,0.05,0],[128,1,0.025,0],[4,1,0.025,-10]])
+        [4,1,0.025,-10],[4,1,0.025,-10],[3,1,0.01,-10], [3,1,0.01,-10],[128,1,0.01,0],[3,1,0.025,-10],
+        [128,1,0.05,-10],[4,1,0.025,-10],[128,1,0.05,0],[128,1,0.025,0],[4,1,0.025,-10]])
 
         r = array[np.random.choice(len(array))] 
         r1 = array[np.random.choice(len(array))]
@@ -149,23 +149,23 @@ class Task(Processor):
             self.datagathering = self.datagathering+1
             self.laser = self.laser + 1
 
-        if (snout[1] > -0.1) & (self.state == True): #ALPHA
+        if (snout[1] > 0.1) & (self.state == True): #ALPHA ####################################################################3 THIRD STATE
             """
                 This is basically the last state that happens.
             """
             if (self.passedline == 1):
                 
-                position = np.array([[0.345124048611534,0.31092,0.2986379991671331,0.0923123307118616],
+                position = np.array([[0.245124048611534,0.31092,0.2986379991671331,0.0923123307118616],
                 [0.3264870654094638,0.3164061037921699,0.3916007249175778,0.2214495887677442], 
-                [0.3184087513325254,0.1337,0.3539590839116937,0.87925],
-                [0.3389969634209976,0.3487747011160018,0.2445337644944189,0.5099765907582785],
-                [0.367863189193704,0.6459206009855982,0.2835000107104188,0.5944752850701914],
-                [0.3490377382810209,0.5234212920927465,0.3158038041104287,0.3288673286884608],
-                [0.204640958925259,0.7375779833786207,0.2696941576821826,0.540962695199933],
-                [0.3653431457256266,0.0269425707604928,0.2006729040804592,0.5654396950901495],
+                [0.3184087513325254,0.1337,0.2539590839116937,0.37925],
+                [0.2389969634209976,0.3487747011160018,0.3445337644944189,0.2099765907582785],
+                [0.367863189193704,0.2459206009855982,0.2835000107104188,0.2944752850701914],
+                [0.3490377382810209,0.3234212920927465,0.2158038041104287,0.3288673286884608],
+                [0.204640958925259,0.1375779833786207,0.2696941576821826,0.240962695199933],
+                [0.3653431457256266,0.0269425707604928,0.3006729040804592,0.2654396950901495],
                 [0.2299346725539502,0.0540982194547274,0.2497587457440584,0.4762],
-                [0.2878285469075038,0.64172,0.3446388947783994,0.167342554078676]])
-            
+                [0.2878285469075038,0.24172,0.3446388947783994,0.167342554078676]])
+                            
                 position = position[np.random.choice(len(position))]
                
                 
@@ -173,14 +173,14 @@ class Task(Processor):
                 
                 angle = position[1]
 
-                (self.x_position,self.y_position) = (snout[0] + distance * math.sin(angle), -0.1 + distance * math.cos(angle))
+                (self.x_position,self.y_position) = (snout[0] + distance * math.sin(angle), 0.1 + distance * math.cos(angle))
                 (self.x_position,self.y_position)=(self.x_position*math.cos(headangle)-self.y_position*math.sin(headangle),self.x_position*math.sin(headangle)+self.y_position* math.cos(headangle))
                 
                 distance1 = position[2]
                 
                 angle1 = position[3]
 
-                (self.x_position1,self.y_position1) = (snout[0] + distance1 * math.sin(angle1), -0.1 + distance1 * math.cos(angle1))
+                (self.x_position1,self.y_position1) = (snout[0] + distance1 * math.sin(angle1), 0.1 + distance1 * math.cos(angle1))
                 (self.x_position1,self.y_position1)=(self.x_position1*math.cos(headangle)-self.y_position1*math.sin(headangle),self.x_position1*math.sin(headangle)+self.y_position1* math.cos(headangle))
                 
                 if self.y_position < 0:
@@ -188,7 +188,14 @@ class Task(Processor):
 
                 if self.y_position1 < 0:
                     self.y_position1 = self.y_position1*-1
-                
+
+                if self.y_position > 0.4:
+                    self.y_position = 0.3
+
+                if self.y_position1 > 0.4:
+                    self.y_position1 = 0.2
+
+              
                 print('distance = %f'%(distance))
                 print(snout[0])
                 print(snout[1])
@@ -209,7 +216,7 @@ class Task(Processor):
                 self.circle.draw()
                 self.circle1.draw()
                 self.win.flip()
-                print('stimuli now')
+                
                 
 
 
@@ -221,7 +228,7 @@ class Task(Processor):
             self.wewantfirstdata = 0
 
 
-        elif (self.state == True): # BETA
+        elif (self.state == True): # BETA##############################################################################################3 SECOND STATE
             """
                 This is basically the 2nd thing that happens after the first state GAMMA when mouse init by putting snout in the init hole.
             """
@@ -268,7 +275,7 @@ class Task(Processor):
             """
 
             self.startingFlag = 0
-        elif (self.state == False): # GAMMA
+        elif (self.state == False): # GAMMA #################################################################################### FRIST STATE
             self.passedline = 1 # this is to re register a new position for the stimulus 
             """
                 This basically the first thing that ever happen for every round.
