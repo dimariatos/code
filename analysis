@@ -1,3 +1,10 @@
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jul 28 10:47:14 2021
+
+@author: Dimitrios
+"""
+
 
 import numpy as np
 import pandas as pd 
@@ -47,7 +54,6 @@ k3 =k.iloc[:,13] # laser
 
 k4 = k.iloc[:,14] # frame time
 
-#k4 = k4 != 100
 
 k = pd.concat([k1, k3, k4], axis=1) #stimulus we are analysing
 
@@ -149,7 +155,8 @@ total.columns=['left_head_body_angle', 'snout_x','snout_y','snout_likelihood','l
 
 total = total.fillna(method='ffill')
 
-total = total.replace(100,0) 
+total = total.dropna()
+
 
 
 '''make laser true or false'''
@@ -231,7 +238,6 @@ total['dis'] = total['dxsq'] + total['dysq']
 total['dis'] = np.sqrt(total['dis'])
 
 
-
 #calculate the line between the snout and ears
 
 [x1,y1] = [total.x_snout,total.y_snout]
@@ -274,22 +280,18 @@ total.columns=['left_head_body_angle', 'snout_x','snout_y','snout_likelihood','l
             'right_ear_x_c','right_ear_y_c','tail_x_c','tail_y_c','laser1','dangle','dx','dy','dxsq','dysq','distance','mouse_angle']
 
 
-
 new_total = total.drop_duplicates(subset='time', keep='first', inplace=False, ignore_index=True)
 
 # drop the nan values
 
 new_total = new_total.dropna()
 
-
-difference_time = new_total.time.diff();
-
 # Create two new dataframe one with stimuli and one without
 new_total1 = new_total[new_total['opacity'] == 0].reset_index()
+new_total1 = new_total1[new_total1['y_snout'] > 0].reset_index()
 
-
-
-new_total2 = new_total[new_total['opacity'] != 0]
+new_total2 = new_total[new_total['opacity'] != 0].reset_index()
+new_total2 = new_total[new_total['opacity'] != 100].reset_index()
 new_total2 = new_total2.dropna()
 new_total2 = new_total2.reset_index()
 
@@ -315,10 +317,6 @@ for i in range(len(new_total2)):
 
 
 ######################################
-'''Take out long trials'''
-
-new_total2 = sizefilter(new_total2,15)
-
 # Get trials with laser and without laser WITH stimuli
 
 new_total3 = new_total2[new_total2['laser1'] == True]
@@ -345,10 +343,8 @@ plt.figure(1)
 plt.plot(difference_angle)
 plt.ylabel('Angle')
 plt.xlabel('Stimuli')
-plt.title('Head Angle')
+plt.title('OverallHead Angle With Stimuli')
 
-df = new_total2[new_total2['trial'] == bestangle]
-#df.to_csv('/home/titan/Desktop/Elli-mice-trials/2_Stimuli_8/357374_8/best_stimuli1')
 
 '''Plot the head angle for stimuli with laser'''
 
@@ -363,12 +359,13 @@ difference_angle = headangletrials.diff();
 difference_angle = difference_angle.max()
 bestangle = difference_angle.idxmax()
 
+print('the best stimuli is in trial', bestangle)
 # Plotting changes om body angle trials
 plt.figure(2)
 plt.plot(difference_angle)
 plt.ylabel('Angle')
 plt.xlabel('Stimuli')
-plt.title('Head Angle With Laser')
+plt.title('Stimulus Head Angle With Laser')
 
 #Find the median
 mean = difference_angle.mean()
@@ -406,7 +403,7 @@ plt.figure(3)
 plt.plot(difference_angle)
 plt.ylabel('Angle')
 plt.xlabel('Stimuli')
-plt.title('Head Angle Without Laser')
+plt.title('Stimulus Head Angle Without Laser')
 
 mean1 = difference_angle.mean()
 
@@ -428,8 +425,6 @@ percentage_without_laser = value/value1
 '''WITHOUT STIMULI '''
 
 #find the start, end and the number of trials
-new_total1 = new_total1.dropna()
-new_total1 = new_total1.reset_index()
 
 new_total1.insert(40, 'trial', 0)
 x = 0
@@ -444,7 +439,6 @@ for i in range(len(new_total1)):
         idx = idx + 1
         new_total1.iloc[i,40] = idx
 
-new_total1 = sizefilter(new_total1,15)
 
 # Get trials with laser and without laser WITHOUT stimuli
 
@@ -454,8 +448,6 @@ new_total4 = new_total1[new_total1['laser1'] == False] # without laser
 
 # calculate the difference in head body angle over each trial
 
-dups_values = new_total1.pivot_table(columns=['trial'], aggfunc='size')
-print (dups_values)
 
 headangle = new_total1['left_head_body_angle']
 trials = new_total1['trial']
@@ -470,13 +462,11 @@ bestangle = difference_angle.idxmax()
 
 print('the best stimuli is in trial', bestangle)
 # Plotting changes om body angle trials
-plt.figure(1)
+plt.figure(4)
 plt.plot(difference_angle)
 plt.ylabel('Angle')
 plt.xlabel('Stimuli')
-plt.title('Head Angle')
-
-df = new_total1[new_total1['trial'] == bestangle]
+plt.title('Overall Head Angle No Stimulus')
 
 
 '''Plot the head angle for stimuli with laser'''
@@ -492,6 +482,7 @@ difference_angle = headangletrials.diff();
 difference_angle = difference_angle.max()
 bestangle = difference_angle.idxmax()
 
+print('the best stimuli is in trial', bestangle)
 # Plotting changes om body angle trials
 plt.figure(5)
 plt.plot(difference_angle)
@@ -524,7 +515,6 @@ headangletrials = pd.concat([trials, headangle], axis=1).reindex(new_total1.inde
 
 headangletrials = headangletrials.pivot(columns='trial', values='left_head_body_angle')
 
- 
 
 difference_angle = headangletrials.diff();
 difference_angle = difference_angle.max()
@@ -551,13 +541,13 @@ value = value.sum()
 value1 = difference_angle.value_counts()
 value1 = value1.sum()
 
-percentage_without_laser_wihtout_stim = value/value1
+percentage_without_laser_without_stim = value/value1
 
 ######################################################################
 
 '''Bar graph of distraction percentage with stimuli and laser status'''
 
-Values = [percentage_without_laser,percentage_with_laser,percentage_without_laser_wihtout_stim,percentage_with_laser_without_stim]
+Values = [percentage_without_laser,percentage_with_laser,percentage_without_laser_without_stim,percentage_with_laser_without_stim]
 Label = ['Without_Laser_Stim','With_Laser_Stim','Without_Laser','With_Laser']
 fig = plt.figure(figsize = (10,5))
 plt.bar(Label, Values, color = 'maroon', width = 0.8)
@@ -565,30 +555,3 @@ plt.xlabel('Laser Status')
 plt.ylabel('Distraction Percentage')
 plt.title('Distraction Percentage of Stimulus VS Laser Status')
 plt.show()
-
-#############################
-
-'''stimulus on left or right'''
-        
-left_stim = new_total2['x_snout'] > new_total2['x']
-left_turn = new_total2['left_head_body_angle'] < 180
-
-df = pd.concat([new_total2, left_stim,left_turn], axis=1).reindex(new_total2.index)
-
-'''drop unnecessary columns'''
-
-df = df.drop(columns=['snout_x','snout_y','snout_likelihood','left_ear_x','left_ear_y',
-            'left_ear_likelihood','right_ear_x','right_ear_y','right_ear_likelihood',
-            'tail_x','tail_y','tail_likelihood','frame_time','pose_time'])
-df = df.drop(columns=['index', 'dx','dy','dxsq','dysq'])
-
-'''rename coulmns'''
-
-df.columns=['left_head_body_angle','x','y','edges'
-            ,'opacity','radius','orientation','laser','time','x_snout','y_snout','left_ear_x_c','left_ear_y_c',
-            'right_ear_x_c','right_ear_y_c','tail_x_c','tail_y_c','laser1','dangle','distance','mouse_angle','trial','Stimulus_Left','left_turn']
-
-'''Find the smallest distance for each tral'''
-
-Distance = new_total2.pivot(columns='trial', values='distance')
-Distance = Distance.min()
