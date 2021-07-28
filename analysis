@@ -1,3 +1,12 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Wed Jul 28 11:58:54 2021
+
+@author: titan
+"""
+
+
 # -*- coding: utf-8 -*-
 """
 Created on Wed Jul 28 10:47:14 2021
@@ -39,7 +48,7 @@ def sizefilter(df,length):
 
 '''Begin by opening the stimulus data'''
 
-k = read1('C:/Users/Dimitrios/Desktop/thedata97.pkl') #open the pickle file with stimuli data
+k = read1('/home/titan/Desktop/SIlencing/375530_7/thedata96.pkl') #open the pickle file with stimuli data
 
 k.columns=['x','y','edges','opacity','radius','orientation','delete','x','y','edges','opacity','radius','orientation','laser','frame_time']
 k = k.drop([0])
@@ -63,7 +72,7 @@ stim2 = pd.concat([k2, k3], axis=1) #send stimuli to analyse
 
 ''' Open the Pose file'''
 
-df = pd.read_hdf('C:/Users/Dimitrios/Desktop/blackfly_388071_2021-07-25_7_DLC.hdf5') #open the hdf5 file from DLC live
+df = pd.read_hdf('/home/titan/Desktop/SIlencing/375530_7/blackfly_375530_2021-07-25_7_DLC.hdf5') #open the hdf5 file from DLC live
 
 df.columns=['snout_x','snout_y','snout_likelihood','left_ear_x','left_ear_y',
             'left_ear_likelihood','right_ear_x','right_ear_y','right_ear_likelihood',
@@ -285,35 +294,53 @@ new_total = total.drop_duplicates(subset='time', keep='first', inplace=False, ig
 # drop the nan values
 
 new_total = new_total.dropna()
+new_total = new_total[new_total['opacity'] != 100].reset_index()
+new_total = new_total[new_total['y_snout'] > 0].reset_index()
 
+#find the start, end and the number of trials
+
+new_total.insert(40, 'trial', 0)
+x = 0
+idx = 0
+
+for i in range(len(new_total)):
+    if x == new_total['x'][i]:
+        new_total.iloc[i,40] = idx
+
+    else:
+        x = new_total['x'][i]
+        idx = idx + 1
+        new_total.iloc[i,40] = idx
+
+headangle = new_total['left_head_body_angle']
+trials = new_total['trial']                 
+                       
+headangletrials = pd.concat([trials, headangle], axis=1).reindex(new_total.index)
+
+headangletrials = headangletrials.pivot(columns='trial', values='left_head_body_angle')
+
+difference_angle = headangletrials.diff();
+difference_angle = difference_angle.max()
+mean = difference_angle.mean()+difference_angle.std()
+
+
+new_total = new_total.dropna()
+
+plt.figure(7)
+plt.plot(difference_angle)
+plt.ylabel('Angle')
+plt.xlabel('Stimuli')
+plt.title('Head Angle all trials')
 # Create two new dataframe one with stimuli and one without
-new_total1 = new_total[new_total['opacity'] == 0].reset_index()
-new_total1 = new_total1[new_total1['y_snout'] > 0].reset_index()
+new_total1 = new_total[new_total['opacity'] == 0]
 
-new_total2 = new_total[new_total['opacity'] != 0].reset_index()
-new_total2 = new_total[new_total['opacity'] != 100].reset_index()
-new_total2 = new_total2.dropna()
-new_total2 = new_total2.reset_index()
-
+new_total2 = new_total[new_total['opacity'] != 0]
 
 #######################################################################
 
 '''WITH STIMULI '''
 
 #find the start, end and the number of trials
-
-new_total2.insert(40, 'trial', 0)
-x = 0
-idx = 0
-
-for i in range(len(new_total2)):
-    if x == new_total2['x'][i]:
-        new_total2.iloc[i,40] = idx
-
-    else:
-        x = new_total2['x'][i]
-        idx = idx + 1
-        new_total2.iloc[i,40] = idx
 
 
 ######################################
@@ -367,8 +394,6 @@ plt.ylabel('Angle')
 plt.xlabel('Stimuli')
 plt.title('Stimulus Head Angle With Laser')
 
-#Find the median
-mean = difference_angle.mean()
 
 #the distracting stimuli without laser
 Distracting1 = difference_angle[ difference_angle > mean]
@@ -405,7 +430,6 @@ plt.ylabel('Angle')
 plt.xlabel('Stimuli')
 plt.title('Stimulus Head Angle Without Laser')
 
-mean1 = difference_angle.mean()
 
 #the distracting stimuli without laser
 Distracting1 = difference_angle[ difference_angle > mean]
@@ -425,19 +449,6 @@ percentage_without_laser = value/value1
 '''WITHOUT STIMULI '''
 
 #find the start, end and the number of trials
-
-new_total1.insert(40, 'trial', 0)
-x = 0
-idx = 0
-
-for i in range(len(new_total1)):
-    if x == new_total1['x'][i]:
-        new_total1.iloc[i,40] = idx
-
-    else:
-        x = new_total1['x'][i]
-        idx = idx + 1
-        new_total1.iloc[i,40] = idx
 
 
 # Get trials with laser and without laser WITHOUT stimuli
@@ -490,10 +501,7 @@ plt.ylabel('Angle')
 plt.xlabel('Stimuli')
 plt.title('Head Angle With Laser')
 
-#Find the median
-mean = difference_angle.mean()
 
-#the distracting stimuli without laser
 Distracting1 = difference_angle[ difference_angle > mean]
 
 # Find percentage of distracting trials
@@ -506,7 +514,7 @@ value1 = value1.sum()
 percentage_with_laser_without_stim = value/value1
 
 
-'''Plot the head angle for stimuli without  laser'''
+'''Plot the head angle for stimuli without laser'''
 
 headangle = new_total4['left_head_body_angle']
 trials = new_total4['trial']
@@ -515,7 +523,6 @@ headangletrials = pd.concat([trials, headangle], axis=1).reindex(new_total1.inde
 
 headangletrials = headangletrials.pivot(columns='trial', values='left_head_body_angle')
 
-
 difference_angle = headangletrials.diff();
 difference_angle = difference_angle.max()
 
@@ -523,13 +530,11 @@ bestangle = difference_angle.idxmax()
 
 print('the best stimuli is in trial', bestangle)
 # Plotting changes om body angle trials
-plt.figure(6)
+plt.figure(3)
 plt.plot(difference_angle)
 plt.ylabel('Angle')
 plt.xlabel('Stimuli')
 plt.title('Head Angle Without Laser')
-
-mean1 = difference_angle.mean()
 
 #the distracting stimuli without laser
 Distracting1 = difference_angle[ difference_angle > mean]
@@ -555,3 +560,8 @@ plt.xlabel('Laser Status')
 plt.ylabel('Distraction Percentage')
 plt.title('Distraction Percentage of Stimulus VS Laser Status')
 plt.show()
+
+
+
+
+
