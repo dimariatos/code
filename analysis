@@ -14,7 +14,6 @@ Created on Wed Jul 28 10:47:14 2021
 @author: Dimitrios
 """
 
-
 import numpy as np
 import pandas as pd 
 import pickle
@@ -247,7 +246,7 @@ total['dis'] = total['dxsq'] + total['dysq']
 total['dis'] = np.sqrt(total['dis'])
 
 
-#calculate the line between the snout and ears
+#calculate the line between the snout and midpoint between ears
 
 [x1,y1] = [total.x_snout,total.y_snout]
 [x2,y2] = [total.left_ear_x_c,total.left_ear_y_c]
@@ -564,4 +563,9 @@ plt.show()
 
 
 
+dist=new_total2[['trial','distance']]
+dist2=dist.pivot(columns='trial',values='distance')
 
+dist2.min()
+
+#need to be rounded due to float poin error
