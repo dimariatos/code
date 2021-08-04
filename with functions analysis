@@ -1,10 +1,3 @@
-#!/usr/bin/env python3
-# -*- coding: utf-8 -*-
-"""
-Created on Thu Jul 29 10:31:49 2021
-
-@author: titan
-"""
 # -*- coding: utf-8 -*-
 """
 Created on Tue Aug  3 15:24:51 2021
@@ -475,6 +468,46 @@ def final(pickle, hdf5):
     s2=pd.Series(s2, index = df.columns)
     df = df.append(s1, ignore_index=True)
     df = df.append(s2, ignore_index=True)
-    
+    stim_mean=df.mean()
+    return [df,stim_mean]
+
+
+
+def one_mice_ploter(list_of_files):
+    '''the list of files:[[pickle1,hdf1],[pickle2,hdf2]]. this averages the mean distraction index from every file,(could be one mouse or different days of the same mouse
+    )
+    '''
+    df=pd.DataFrame()
+    for i in list_of_files:
+       a=pd.DataFrame( final(i[0],i[1])[1])
+       df=pd.concat([df,a],axis=1)
+    return df 
+
+list_of_files=[[day1pickle,dayonehdf][day2pickle,day2hdf][...]]
+mouse1list=list_of_files
+mouse2list=list_of_files
+
+allmicelist=[mouse1list,mouse2list]
+
+
+def all_mice_plot(allmicelist):
+    mus = pd.DataFrame()
+    for i in allmicelist:
+        a= one_mice_ploter(i).mean(axis=1)
+        mus = pd.concat([mus,a], axis = 1)
+    return mus
+        
+
+
+    df=pd.DataFrame()    
+    for i in allmicelist:
+        a=onemouseploter(i).mean(axis=1)
+        df=pd.concat([df,a],axis=1)
+        
     return df
-    
+
+
+
+
+
+
