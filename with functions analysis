@@ -5,8 +5,12 @@ Created on Thu Jul 29 10:31:49 2021
 
 @author: titan
 """
+# -*- coding: utf-8 -*-
+"""
+Created on Tue Aug  3 15:24:51 2021
 
-
+@author: chara
+"""
 
 
 import numpy as np
@@ -92,8 +96,8 @@ def function1(pickle, hdf5):
     
     df.frame_time = df.frame_time.astype(float)
     
-    k.frame_time = k.frame_time.round(1) #round the decimal points of the frame time to match the hdf5 file
-     
+    stim1.frame_time = k.frame_time.round(1) #round the decimal points of the frame time to match the hdf5 file
+    stim2.frame_time = k.frame_time.round(1)
     df.frame_time = df.frame_time.round(1) #round the decimal points of the frame time to match the pickle file
     
     '''merge the two files '''
@@ -353,8 +357,10 @@ def function2(merged):
 
 
 
-#merged1=function2(merged)[0]
-#merged2=function2(merged)[1]
+# =============================================================================
+# merged1=function2(merged)[0]
+# merged2=function2(merged)[1]
+# =============================================================================
 
 
 def function3 (merged1,merged2):
@@ -471,7 +477,4 @@ def final(pickle, hdf5):
     df = df.append(s2, ignore_index=True)
     
     return df
-
-
-    
     
