@@ -1,9 +1,13 @@
+#!/usr/bin/env python3
 # -*- coding: utf-8 -*-
 """
-Created on Tue Aug  3 15:24:51 2021
+Created on Thu Jul 29 10:31:49 2021
 
-@author: chara
+@author: titan
 """
+
+
+
 
 import numpy as np
 import pandas as pd 
@@ -95,7 +99,7 @@ def function1(pickle, hdf5):
     '''merge the two files '''
     
     merged1 = df.merge(stim1, how='outer', on='frame_time') # merge the hdf5 file with the pickle file dependent on the time frame for 1 stim
-    merged2= df.merge(stim1, how='outer', on='frame_time') # merge the hdf5 file with the pickle file dependent on the time frame for the other stim
+    merged2= df.merge(stim2, how='outer', on='frame_time') # merge the hdf5 file with the pickle file dependent on the time frame for the other stim
     
     return [merged1,merged2]
 
@@ -349,8 +353,8 @@ def function2(merged):
 
 
 
-merged1=function2(merged)[0]
-merged2=function2(merged)[1]
+#merged1=function2(merged)[0]
+#merged2=function2(merged)[1]
 
 
 def function3 (merged1,merged2):
@@ -358,15 +362,15 @@ def function3 (merged1,merged2):
     newtotal2=function2(merged2)
     return [newtotal1,newtotal2]
 
-newtotal1=function3 (merged1,merged2)[0][0]
+#newtotal1=function3 (merged1,merged2)[0][0]
 
-Side1=function3 (merged1,merged2)[0][1]
+#Side1=function3 (merged1,merged2)[0][1]
 
 
 def sidefinder(new_total,Side,stim,laser):
     
-    newtotal1=function3 (merged1,merged2)[0][0]
-    newtotal2=function3(merged1,merged2)[1][0]
+    #newtotal1=function3 (merged1,merged2)[0][0]
+    #newtotal2=function3(merged1,merged2)[1][0]
 
     if stim==True:
         Stimuli = new_total[new_total['opacity'] > 0].reset_index()
@@ -421,6 +425,7 @@ def sidefinder(new_total,Side,stim,laser):
 
 
 def final(pickle, hdf5):
+    df=pd.DataFrame(columns=['stim_laser_R','stim_laser_L','stim_nolaser_R','stim_nolaser_L','nostim_laser_R','nostim_laser_L','nostim_nolaser_R','nostim_nolaser_L'])
     a=function1(pickle, hdf5)
     merged1=a[0]
     merged2=a[1]
@@ -458,20 +463,14 @@ def final(pickle, hdf5):
     nostim2_nolaser_R=nostim2_nolaser[-2]
     nostim2_nolaser_L=nostim2_nolaser[-1]
     print ('done with sidefinder stim2')
-    df=pd.DataFrame([stim1_laser_R,stim1_laser_L,stim1_nolaser_R,stim1_nolaser_L,nostim1_laser_R,nostim1_laser_L,nostim1_nolaser_R,nostim1_nolaser_L],
-                    [stim2_laser_R,stim2_laser_L,stim2_nolaser_R,stim2_nolaser_L,nostim2_laser_R,nostim2_laser_L,nostim2_nolaser_R,nostim2_nolaser_L])
-    df=df.mean()
+    s1=[stim1_laser_R,stim1_laser_L,stim1_nolaser_R,stim1_nolaser_L,nostim1_laser_R,nostim1_laser_L,nostim1_nolaser_R,nostim1_nolaser_L]
+    s2=[stim2_laser_R,stim2_laser_L,stim2_nolaser_R,stim2_nolaser_L,nostim2_laser_R,nostim2_laser_L,nostim2_nolaser_R,nostim2_nolaser_L]
+    s1=pd.Series(s1, index = df.columns)
+    s2=pd.Series(s2, index = df.columns)
+    df = df.append(s1, ignore_index=True)
+    df = df.append(s2, ignore_index=True)
+    
     return df
-
-
-filelist=[[pickle1,hdf1],[pickle2,hdf2],[pickle3,hdf3]]#could be different sessions from the same mouse or different mice
-
-for file in filelist:
-    df=pd.DataFrame()
-    a=final(file[0],file[1])
-    pd.concat[df,a]
-
-
 
 
     
