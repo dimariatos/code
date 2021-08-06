@@ -1,11 +1,3 @@
-# -*- coding: utf-8 -*-
-"""
-Created on Tue Aug  3 15:24:51 2021
-
-@author: chara
-"""
-
-
 import numpy as np
 import pandas as pd 
 import pickle
@@ -365,8 +357,14 @@ def function3 (merged1,merged2):
 
 #Side1=function3 (merged1,merged2)[0][1]
 
-
-def sidefinder(new_total,Side,stim,laser):
+def half_of_them(list1):
+    list2=[]
+    for i in list1[:]:
+        i=i.sample(frac=0.5)
+        list2.append(i)
+    return(list2)
+    
+def sidefinder(new_total,Side,stim,laser,half=False):
     
     #newtotal1=function3 (merged1,merged2)[0][0]
     #newtotal2=function3(merged1,merged2)[1][0]
@@ -391,6 +389,7 @@ def sidefinder(new_total,Side,stim,laser):
     
     mouseangle_trials = pd.concat([trial, mouseangle], axis=1)
     mouseangle_trials = mouseangle_trials.pivot(columns='trial', values='mouse_angle')
+    mouseangle_trials = mouseangle_trials.diff()
     mouseangle_trials = mouseangle_trials.min()
     mouseangle_trials = mouseangle_trials.reset_index()
     
@@ -406,23 +405,30 @@ def sidefinder(new_total,Side,stim,laser):
     Stimuli_laser_right.columns=['trial','angle']
     Stimuli_laser_left.columns=['trial','angle']
     
-    Stimuli_laser_right1 = Stimuli_laser_right[Stimuli_laser_right['angle'] < 8 ]
-    Stimuli_laser_left1 = Stimuli_laser_left[Stimuli_laser_left['angle'] < 8 ]
-    value_r = Stimuli_laser_right1.count()
+    Stimuli_laser_right1 = Stimuli_laser_right[Stimuli_laser_right['angle'] < -150 ]
+    Stimuli_laser_left1 = Stimuli_laser_left[Stimuli_laser_left['angle'] < -150]
+    list1=[Stimuli_laser_right,Stimuli_laser_left,Stimuli_laser_right1,Stimuli_laser_left1]
+    if half==True:
+        list1=half_of_them(list1)
     
-    value2_r = Stimuli_laser_right.count()
+    
+    value_r = list1[2].count()
+    value2_r = list1[0].count()
     percent_r = value_r/value2_r
     stimulus_laser_percent_right = percent_r[0]
     
-    value_l = Stimuli_laser_left1.count()
-    value2_l = Stimuli_laser_left.count()
+    value_l = list1[-1].count()
+    value2_l = list1[1].count()
     percent_l = value_l/value2_l
     stimulus_laser_percent_left = percent_l[0]
     
+    list1.append(stimulus_laser_percent_right)
+    list1.append(stimulus_laser_percent_left)
+    return list1
+
+
+
     
-    return [Stimuli_laser_right,Stimuli_laser_left,Stimuli_laser_right1,Stimuli_laser_left1,stimulus_laser_percent_right , stimulus_laser_percent_left ]
-
-
 def final(pickle, hdf5):
     df=pd.DataFrame(columns=['stim_laser_R','stim_laser_L','stim_nolaser_R','stim_nolaser_L','nostim_laser_R','nostim_laser_L','nostim_nolaser_R','nostim_nolaser_L'])
     a=function1(pickle, hdf5)
@@ -436,16 +442,16 @@ def final(pickle, hdf5):
     newtotal2=c[0]
     Side2=c[1]
     print ('done with function2')
-    stim1_laser=sidefinder(newtotal1, Side1, True, True)
+    stim1_laser=sidefinder(newtotal1, Side1, True, True,)
     stim1_laser_R=stim1_laser[-2]#the percentage of the stimuli on its right it attended with laser
     stim1_laser_L=stim1_laser[-1]#the percentage of the stimuli on its left it attended with laser
     stim1_nolaser=sidefinder(newtotal1, Side1, True, False)
     stim1_nolaser_R=stim1_nolaser[-2]
     stim1_nolaser_L=stim1_nolaser[-1]
-    nostim1_laser=sidefinder(newtotal1, Side1, False,True)
+    nostim1_laser=sidefinder(newtotal1, Side1, False,True,True)
     nostim1_laser_R=nostim1_laser[-2]
     nostim1_laser_L=nostim1_laser[-1]
-    nostim1_nolaser=sidefinder(newtotal1, Side1, False,False)
+    nostim1_nolaser=sidefinder(newtotal1, Side1, False,False,True)
     nostim1_nolaser_R=nostim1_nolaser[-2]
     nostim1_nolaser_L=nostim1_nolaser[-1]
     print ('done with sidefinder stim1')
@@ -455,10 +461,10 @@ def final(pickle, hdf5):
     stim2_nolaser=sidefinder(newtotal2, Side2, True, False)
     stim2_nolaser_R=stim2_nolaser[-2]
     stim2_nolaser_L=stim2_nolaser[-1]
-    nostim2_laser=sidefinder(newtotal2, Side2, False,True)
+    nostim2_laser=sidefinder(newtotal2, Side2, False,True,True)
     nostim2_laser_R=nostim2_laser[-2]
     nostim2_laser_L=nostim2_laser[-1]
-    nostim2_nolaser=sidefinder(newtotal2, Side2, False,False)
+    nostim2_nolaser=sidefinder(newtotal2, Side2, False,False,True)
     nostim2_nolaser_R=nostim2_nolaser[-2]
     nostim2_nolaser_L=nostim2_nolaser[-1]
     print ('done with sidefinder stim2')
@@ -469,7 +475,7 @@ def final(pickle, hdf5):
     df = df.append(s1, ignore_index=True)
     df = df.append(s2, ignore_index=True)
     stim_mean=df.mean()
-    return [df,stim_mean]
+    return [a,b,c,df,stim_mean]
 
 
 
@@ -505,9 +511,3 @@ def all_mice_plot(allmicelist):
         df=pd.concat([df,a],axis=1)
         
     return df
-
-
-
-
-
-
