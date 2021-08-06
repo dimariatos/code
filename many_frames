@@ -1,3 +1,11 @@
+#!/usr/bin/env python3
+# -*- coding: utf-8 -*-
+"""
+Created on Fri Aug  6 16:14:05 2021
+
+@author: titan
+"""
+
 
 # -*- coding: utf-8 -*-
 """
@@ -60,7 +68,7 @@ def helpingdf(df):
 
 '''Begin by opening the stimulus data'''
 
-k = read1('C:/Users/chara/Desktop/384952_4/thedata107.pkl') #open the pickle file with stimuli data
+k = read1('/home/titan/Desktop/SIlencing/375529_4/thedata96.pkl') #open the pickle file with stimuli data
 
 k.columns=['x','y','edges','opacity','radius','orientation','delete','x','y','edges','opacity','radius','orientation','laser','frame_time']
 k = k.drop([0])
@@ -84,7 +92,7 @@ stim2 = pd.concat([k2, k3], axis=1) #send stimuli to analyse
 
 ''' Open the Pose file'''
 
-df = pd.read_hdf('C:/Users/chara/Desktop/384952_4/blackfly_384952_2021-07-22_4_DLC.hdf5') #open the hdf5 file from DLC live
+df = pd.read_hdf('/home/titan/Desktop/SIlencing/375529_4/blackfly_375529_2021-07-22_4_DLC.hdf5') #open the hdf5 file from DLC live
 
 df.columns=['snout_x','snout_y','snout_likelihood','left_ear_x','left_ear_y',
             'left_ear_likelihood','right_ear_x','right_ear_y','right_ear_likelihood',
@@ -116,7 +124,7 @@ for i in range(merged.shape[0]):
     if (a**2+b**2-c**2)/(2*b*a) > 1:
         angle = math.acos(1)
     else:
-        angle = math.acos((a**2+b**2-c**2)/(2*b*a))
+        angle = math.acos(np.round((a**2+b**2-c**2)/(2*b*a),4))
     angle = math.degrees(angle)
     angles.append(angle)
 
@@ -134,7 +142,7 @@ for i in range(merged.shape[0]):
     e = math.sqrt((x4a[i]-x1a[i])**2+(y4a[i]-y1a[i])**2)
     f = math.sqrt((x1a[i]-x2[i])**2+(y1a[i]-y2[i])**2)
     
-    angle1 = math.acos((d**2+e**2-f**2)/(2*e*d))
+    angle1 = math.acos(np.round((d**2+e**2-f**2)/(2*e*d),4))
     angle1 = math.degrees(angle1)
     angles1.append(angle1)
     
@@ -377,3 +385,17 @@ stimuli2 = stimuli2.count()
 
 percent_nostim = nostimuli2/nostimuli1
 percent_stim = stimuli2/stimuli1
+
+
+
+
+test=new_total.pivot(columns='trial',values='distance')
+min_dist_per_trial=test.min()
+test2=new_total.loc[new_total.distance.isin(min_dist_per_trial)]
+test3=test2.drop_duplicates(subset=['frame_time'])
+frametimes=test3['frame_time']
+
+indices=test3['index']
+two_frames_before=indices-2
+new_total_two_before=new_total.loc[new_total['index'].isin(two_frames_before)]
+test3['mouse_angle']-new_total_two_before['mouse_angle']
